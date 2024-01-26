@@ -1,0 +1,56 @@
+import random
+import mysql.connector
+
+# Replace the placeholders with your database details
+cnx = mysql.connector.connect(
+    host='localhost',
+    user='andy',
+    password='Andydy212003*',
+    database='project_database'
+)
+
+cursor = cnx.cursor()
+
+# Function to generate random numbers
+def generate_random_numbers(length):
+    random_numbers = ''.join(str(random.randint(0, 9)) for _ in range(length))
+    return random_numbers
+
+# Generate MIDCode
+MIDCode = generate_random_numbers(11)
+print("MIDCode:", MIDCode)
+
+# Insert MIDCode and password into login table
+query = "INSERT INTO login (MIDCode, Password) VALUES (%s, %s)"
+password = input("Enter your password: ")
+cursor.execute(query, (MIDCode, password))
+cnx.commit()
+
+# Collect user details
+MIDNumber = MIDCode
+Name = input("Name: ")
+Sex = input("Sex: ")
+Father = input("Father: ")
+Mother = input("Mother: ")
+Spouse = input("Spouse: ")
+Birthdate = input("Birthdate: ")
+Birthplace = input("Birthplace: ")
+Status = input("Status: ")
+Citizenship = input("Citizenship: ")
+SSS = input("SSS: ")
+TIN = input("TIN: ")
+HomeAddress = input("HomeAddress: ")
+EmailAddress = input("EmailAddress: ")
+PhoneNumber = input("PhoneNumber: ")
+HeirsName = input("HeirsName: ")
+HeirsBirthdate = input("HeirsBirthdate: ")
+
+# Insert user details into memberdetails table
+query = "INSERT INTO memberdetails (MIDNumber, Name, Sex, Father, Mother, Spouse, Birthdate, Birthplace, Status, Citizenship, SSS, TIN, HomeAddress, EmailAddress, PhoneNumber, HeirsName, HeirsBirthdate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+values = (MIDNumber, Name, Sex, Father, Mother, Spouse, Birthdate, Birthplace, Status, Citizenship, SSS, TIN, HomeAddress, EmailAddress, PhoneNumber, HeirsName, HeirsBirthdate)
+cursor.execute(query, values)
+cnx.commit()
+
+cursor.close()
+cnx.close()
+
