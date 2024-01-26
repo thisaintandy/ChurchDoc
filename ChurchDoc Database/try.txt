@@ -1,56 +1,76 @@
-import random
 import mysql.connector
+import random
 
-# Replace the placeholders with your database details
 cnx = mysql.connector.connect(
     host='localhost',
     user='andy',
     password='Andydy212003*',
-    database='project_database'
+    database='churchdoc'
 )
-
 cursor = cnx.cursor()
 
-# Function to generate random numbers
-def generate_random_numbers(length):
-    random_numbers = ''.join(str(random.randint(0, 9)) for _ in range(length))
-    return random_numbers
+def check_credentials():
+    # Get username and password from user input
+    Username = input("Enter your username: ")
+    Password = input("Enter your password: ")
 
-# Generate MIDCode
-MIDCode = generate_random_numbers(11)
-print("MIDCode:", MIDCode)
+    try:
+        query = "SELECT Username, Password FROM admin WHERE Username = %s"
+        cursor.execute(query, (Username,))
+        user = cursor.fetchone()
 
-# Insert MIDCode and password into login table
-query = "INSERT INTO login (MIDCode, Password) VALUES (%s, %s)"
-password = input("Enter your password: ")
-cursor.execute(query, (MIDCode, password))
-cnx.commit()
+        if user:
+            login, stored_password = user
+            if stored_password == Password:
+                print("Success")
+            else:
+                print('Incorrect password')
+        else:
+            print('Username not found')
 
-# Collect user details
-MIDNumber = MIDCode
-Name = input("Name: ")
-Sex = input("Sex: ")
-Father = input("Father: ")
-Mother = input("Mother: ")
-Spouse = input("Spouse: ")
-Birthdate = input("Birthdate: ")
-Birthplace = input("Birthplace: ")
-Status = input("Status: ")
-Citizenship = input("Citizenship: ")
-SSS = input("SSS: ")
-TIN = input("TIN: ")
-HomeAddress = input("HomeAddress: ")
-EmailAddress = input("EmailAddress: ")
-PhoneNumber = input("PhoneNumber: ")
-HeirsName = input("HeirsName: ")
-HeirsBirthdate = input("HeirsBirthdate: ")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
 
-# Insert user details into memberdetails table
-query = "INSERT INTO memberdetails (MIDNumber, Name, Sex, Father, Mother, Spouse, Birthdate, Birthplace, Status, Citizenship, SSS, TIN, HomeAddress, EmailAddress, PhoneNumber, HeirsName, HeirsBirthdate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-values = (MIDNumber, Name, Sex, Father, Mother, Spouse, Birthdate, Birthplace, Status, Citizenship, SSS, TIN, HomeAddress, EmailAddress, PhoneNumber, HeirsName, HeirsBirthdate)
-cursor.execute(query, values)
-cnx.commit()
+    finally:
+        if 'cnx' in locals() and cnx.is_connected():
+            cursor.close()
+            cnx.close()
 
-cursor.close()
-cnx.close()
+def request():
+    def generate_random_numbers(length):
+        random_numbers = ''.join(str(random.randint(0, 9)) for _ in range(length))
+        return random_numbers
 
+    # Generate MIDCode
+    TransactionCode = generate_random_numbers(10)
+    print("Transaction Code:", TransactionCode)
+
+    # Take user input for values
+    Name = input("Enter Name: ")
+    Birthdate = input("Enter Birthdate: ")
+    RequestedMaterials = input("Enter Requested Materials: ")
+
+    # SQL query to insert values into the database
+    query = "INSERT INTO request (RequestCode, Name, Birthdate, RequestedMaterials) VALUES (%s, %s, %s, %s)"
+    values = (TransactionCode, Name, Birthdate, RequestedMaterials)
+
+    try:
+        cursor.execute(query, values)
+        cnx.commit()
+        print("Values inserted successfully!")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+
+
+    # Close the cursor and connection
+    cursor.close()
+    cnx.close()
+
+# Call the function
+request()
+
+
+Order Date
+Receive Data
