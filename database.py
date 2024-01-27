@@ -1,5 +1,7 @@
 import mysql.connector
 import random
+from datetime import datetime,timedelta
+
 
 cnx = mysql.connector.connect(
     host='localhost',
@@ -9,6 +11,11 @@ cnx = mysql.connector.connect(
 )
 cursor = cnx.cursor()
 
+# Get the current date and time
+CurrentDate = datetime.now()
+# Add 7 days to the current date
+AvailableDate = CurrentDate + timedelta(days=7)
+    
 def check_credentials():
     # Get username and password from user input
     Username = input("Enter your username: ")
@@ -44,7 +51,7 @@ def request():
         return random_numbers
 
     # Generate RequestCode
-    TransactionCode = generate_random_numbers(10)
+    TransactionCode = generate_random_numbers(9)
     print("Transaction Code:", TransactionCode)
 
     # Take user input for values
@@ -54,16 +61,16 @@ def request():
 
     try:
         # Insert RequestCode into one table
-        query_request_code = "INSERT INTO status (RequestStatus, RequestCode) VALUES (%s, %s)"
-        cursor.execute(query_request_code, ("Processing", TransactionCode,))
+        query_request_code = "INSERT INTO status (RequestStatus, DateRequested, RequestCode, AvailableDate) VALUES (%s, %s, %s, %s)"
+        cursor.execute(query_request_code, ("Processing", CurrentDate, TransactionCode, AvailableDate))
         cnx.commit()
 
         # Get the auto-generated primary key (PK) of the inserted row
         request_code_pk = cursor.lastrowid
 
         # Insert other values along with the reference to RequestCode PK into another table
-        query_data = "INSERT INTO request (RequestCode, Name, Birthdate, RequestedMaterials, Status) VALUES (%s, %s, %s, %s, %s)"
-        values_data = (TransactionCode, Name, Birthdate, RequestedMaterials, "Processing")
+        query_data = "INSERT INTO request (RequestCode, Name, Birthdate, RequestedMaterials, Status, DateRequested, AvailableDate) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        values_data = (TransactionCode, Name, Birthdate, RequestedMaterials, "Processing", CurrentDate, AvailableDate)
         cursor.execute(query_data, values_data)
         cnx.commit()
 
@@ -76,34 +83,34 @@ def request():
         # Close the cursor and connection
         cursor.close()
         cnx.close()
-
+        
 def schedule():
     def generate_random_numbers(length):
         random_numbers = ''.join(str(random.randint(0, 9)) for _ in range(length))
         return random_numbers
 
     # Generate RequestCode
-    ScheduleCode = generate_random_numbers(10)
+    ScheduleCode = generate_random_numbers(9)
     print("Transaction Code:", ScheduleCode)
 
     # Take user input for values
     # Pa-radio button nito ha
     Name = input("Enter Name: ")
-    AppointmentDate = input("Enter Date: ")
-    Appointment = input("Enter Requested Materials: ")
+    AppointmentDate = input("Enter Date for Schedule: ")
+    Appointment = input("Appointment Type: ")
 
     try:
-        # Insert RequestCode into one table
-        query_request_code = "INSERT INTO status (RequestCode, RequestStatus) VALUES (%s, %s)"
-        cursor.execute(query_request_code, (ScheduleCode, "For Approval"))
+        # Insert ScheduleCode into one table
+        query_request_code = "INSERT INTO status (RequestStatus, DateRequested, RequestCode, AvailableDate) VALUES (%s, %s, %s, %s)"
+        cursor.execute(query_request_code, ("For Approval", CurrentDate, ScheduleCode, AvailableDate))
         cnx.commit()
         
         # Get the auto-generated primary key (PK) of the inserted row
         request_code_pk = cursor.lastrowid
         
         # Insert other values along with the reference to RequestCode PK into another table
-        query_data = "INSERT INTO scheduledappointment (RequestCode, Name, Date, Appointment, Status) VALUES (%s, %s, %s, %s, %s)"
-        values_data = (ScheduleCode, Name, AppointmentDate, Appointment, "For Approval")
+        query_data = "INSERT INTO scheduledappointment (RequestCode, DateRequested, Name, ScheduleDate, Appointment, Status) VALUES (%s, %s, %s, %s, %s, %s)"
+        values_data = (ScheduleCode, CurrentDate, Name, AppointmentDate, Appointment, "For Approval")
         cursor.execute(query_data, values_data)
         cnx.commit()
 
